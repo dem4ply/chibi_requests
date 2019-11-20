@@ -33,7 +33,7 @@ Chibi_url
 
 .. code-block:: python
 
-	import chibi_requests import Chibi_url
+	from chibi_requests import Chibi_url
 
 	url = Chibi_url( "http://ifconfig.me'" )
 	response = url.get()
