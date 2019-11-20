@@ -1,6 +1,7 @@
 from chibi_requests import Chibi_url, Response
 from chibi.atlas import Chibi_atlas
 from unittest import TestCase
+from unittest.mock import Mock
 
 
 class Test_url( TestCase ):
@@ -75,3 +76,47 @@ class Test_methods( Test_url ):
         self.assertTrue( response.is_json )
         self.assertIsInstance( response.native, Chibi_atlas )
         self.assertTrue( response.native )
+
+
+class Test_meta( Test_url ):
+    def test_meta_empty( self ):
+        self.assertEqual( self.url.kw, {} )
+
+    def test_meta_with_values( self ):
+        url = Chibi_url(
+            "https://www.google.com", cosa1="cosa1", cosa2="cosa2" )
+        self.assertEqual( url.kw, { 'cosa1': 'cosa1', 'cosa2': 'cosa2' } )
+
+
+class Test_str_functions( Test_url ):
+    def setUp( self ):
+        super().setUp()
+        self.url = Chibi_url( 'http://a.4cdn.org/{board}/threads.json' )
+
+    def test_format( self ):
+        result = self.url.format( board='a' )
+        self.assertIsInstance( result, Chibi_url )
+        self.assertEqual( result, "http://a.4cdn.org/a/threads.json" )
+
+    def test_format_with_params( self ):
+        url = self.url + { 'param1': 'value1' }
+        result = url.format( board='a' )
+        self.assertIsInstance( result, Chibi_url )
+        self.assertEqual(
+            result, "http://a.4cdn.org/a/threads.json?param1=value1" )
+        self.assertEqual(
+            result.params, { 'param1': 'value1' } )
+
+    def test_format_shoudl_add_meta( self ):
+        url = self.url.format( board='a' )
+        self.assertEqual( url.kw, { 'board': 'a' } )
+
+    def test_format_should_conservate_meta( self ):
+        url = Chibi_url( self.url, cosa1="cosa1" )
+        url = url.format( board='a' )
+        self.assertEqual( url.kw, { 'board': 'a', "cosa1": "cosa1" } )
+
+    def test_format_should_conservate_response_class( self ):
+        url = Chibi_url( self.url, response_class=Mock )
+        url = url.format( board='a' )
+        self.assertEqual( url.response_class, Mock )

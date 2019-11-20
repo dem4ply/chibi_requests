@@ -6,6 +6,12 @@ from chibi.atlas import Chibi_atlas
 
 
 class Chibi_url( str ):
+    def __new__( cls , *args, **kw ):
+        obj = str.__new__( cls, *args )
+        obj.response_class = kw.pop( 'response_class', Response )
+        obj.kw = Chibi_atlas( kw )
+        return obj
+
     def __add__( self, other ):
         if isinstance( other, Chibi_url ):
             raise NotImplementedError
@@ -62,10 +68,15 @@ class Chibi_url( str ):
     def host( self ):
         return self.parts[1]
 
+    def format( self, *args, **kw ):
+        result = super().format( *args, **kw )
+        return type( self )(
+            result, response_class=self.response_class, **kw, **self.kw )
+
     def get( self, *args, **kw ):
         response = requests.get( self, *args, **kw )
-        return Response( response )
+        return self.response_class( response, self )
 
     def post( self, *args, **kw ):
         response = requests.post( self, *args, **kw )
-        return Response( response )
+        return self.response_class( response, self )

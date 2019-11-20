@@ -3,8 +3,9 @@ from chibi.atlas import _wrap
 
 
 class Response:
-    def __init__( self, response ):
+    def __init__( self, response, url ):
         self._response = response
+        self.url = url
 
     @property
     def headers( self ):
