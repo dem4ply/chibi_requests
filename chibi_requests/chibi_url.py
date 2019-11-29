@@ -1,4 +1,6 @@
+import copy
 import requests
+from requests.auth import AuthBase
 from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 from chibi_requests.response import Response
 
@@ -6,7 +8,7 @@ from chibi.atlas import Chibi_atlas
 
 
 class Chibi_url( str ):
-    def __new__( cls , *args, **kw ):
+    def __new__( cls, *args, **kw ):
         obj = str.__new__( cls, *args )
         obj.response_class = kw.pop( 'response_class', Response )
         obj.kw = Chibi_atlas( kw )
@@ -28,17 +30,27 @@ class Chibi_url( str ):
             current.update( other )
             parts[4] = urlencode( current, doseq=True )
             return Chibi_url( urlunparse( parts ) )
+        elif isinstance( other, AuthBase ):
+            self.auth = other
+            return copy.copy( self )
         return Chibi_url( "/".join( self.split( '/' ) + [ other ] ) )
 
     def __eq__( self, other ):
         if isinstance( other, Chibi_url ):
-            return str( self ) == str( other )
+            return str( self ) == str( other ) and self.kw == other.kw
         if isinstance( other, str ):
             return str( self ) == other
         return False
 
     def __hash__( self ):
         return hash( str( self ) )
+
+    def __copy__( self ):
+        kw = vars( self )
+        v = kw[ 'kw' ]
+        kw = dict( **kw, **v )
+        del kw[ 'kw' ]
+        return type( self )( self, **kw )
 
     @property
     def base_name( self ):
@@ -74,9 +86,23 @@ class Chibi_url( str ):
             result, response_class=self.response_class, **kw, **self.kw )
 
     def get( self, *args, **kw ):
-        response = requests.get( self, *args, **kw )
+        response = requests.get( str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
     def post( self, *args, **kw ):
-        response = requests.post( self, *args, **kw )
+        response = requests.post( str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
+
+    @property
+    def auth( self ):
+        try:
+            return self.kw._auth
+        except AttributeError:
+            return None
+
+    @auth.setter
+    def auth( self, value ):
+        if isinstance( value, AuthBase ):
+            self.kw.auth = value
+        else:
+            raise NotImplementedError

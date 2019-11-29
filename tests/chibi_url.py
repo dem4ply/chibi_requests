@@ -1,7 +1,8 @@
 from chibi_requests import Chibi_url, Response
 from chibi.atlas import Chibi_atlas
 from unittest import TestCase
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+from requests.auth import HTTPBasicAuth
 
 
 class Test_url( TestCase ):
@@ -120,3 +121,26 @@ class Test_str_functions( Test_url ):
         url = Chibi_url( self.url, response_class=Mock )
         url = url.format( board='a' )
         self.assertEqual( url.response_class, Mock )
+
+
+class Test_auth( Test_url ):
+    def setUp( self ):
+        super().setUp()
+        self.url = Chibi_url( 'http://a.4cdn.org/{board}/threads.json' )
+
+    def test_when_add_a_auth_class_should_create_a_new_object( self ):
+        url_other = self.url + HTTPBasicAuth( 'some_user', 'some_password' )
+        self.assertIsNot( self.url, url_other )
+        self.assertEqual( self.url, url_other )
+
+    @patch( 'requests.get' )
+    def test_should_send_the_auth_using_get( self, requests ):
+        self.url += HTTPBasicAuth( 'some_user', 'some_password' )
+        self.url.get()
+        self.assertEqual( requests.call_args[1][ 'auth' ], self.url.auth )
+
+    @patch( 'requests.post' )
+    def test_should_send_the_auth_using_post( self, requests ):
+        self.url += HTTPBasicAuth( 'some_user', 'some_password' )
+        self.url.post()
+        self.assertEqual( requests.call_args[1][ 'auth' ], self.url.auth )
