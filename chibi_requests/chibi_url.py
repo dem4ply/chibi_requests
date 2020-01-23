@@ -5,6 +5,7 @@ from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 from chibi_requests.response import Response
 
 from chibi.atlas import Chibi_atlas
+from chibi.metaphors import Book
 
 
 class Chibi_url( str ):
@@ -23,17 +24,22 @@ class Chibi_url( str ):
             news = parse_qs( other[1:], keep_blank_values=True )
             current.update( news )
             parts[4] = urlencode( current, doseq=True )
-            return Chibi_url( urlunparse( parts ) )
+            return Chibi_url( urlunparse( parts ),
+                response_class=self.response_class )
         elif isinstance( other, dict ):
             parts = list( urlparse( self ) )
             current = parse_qs( parts[4], keep_blank_values=True )
             current.update( other )
             parts[4] = urlencode( current, doseq=True )
-            return Chibi_url( urlunparse( parts ) )
+            return Chibi_url( urlunparse( parts ),
+                response_class=self.response_class )
         elif isinstance( other, AuthBase ):
             self.auth = other
             return copy.copy( self )
-        return Chibi_url( "/".join( self.split( '/' ) + [ other ] ) )
+        elif isinstance( other, Book ):
+            return self + other.offset
+        return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
+            response_class=self.response_class )
 
     def __eq__( self, other ):
         if isinstance( other, Chibi_url ):

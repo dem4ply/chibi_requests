@@ -28,6 +28,16 @@ class Response:
             return self._native
 
     @property
+    def pagination( self ):
+        try:
+            return self._pagination
+        except AssertionError:
+            raise NotImplementedError(
+                "in the response {} is not implemented the pagination".format(
+                    str( type( self ) )
+                ) )
+
+    @property
     def content_type( self ):
         return self.headers[ 'Content-Type' ]
 

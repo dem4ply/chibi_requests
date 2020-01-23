@@ -3,6 +3,7 @@ from chibi.atlas import Chibi_atlas
 from unittest import TestCase
 from unittest.mock import Mock, patch
 from requests.auth import HTTPBasicAuth
+from chibi.metaphors import Book
 
 
 class Test_url( TestCase ):
@@ -46,6 +47,37 @@ class Test_url_add( Test_url ):
         result = self.url + { 'param1': 'value1', 'param2': 'value2' }
         self.assertEqual(
             { 'param1': 'value1', 'param2': 'value2' }, result.params )
+
+    def test_add_a_book_should_add_the_query( self ):
+        book = Book( page=20, page_size=10, total_elements=1000 )
+        result = self.url + book
+        offset = { k: str( v ) for k, v in book.offset.items() }
+        self.assertEqual( result.params, offset )
+
+
+class Test_add_mainteing_the_response_class( Test_url ):
+    def setUp( self ):
+        super().setUp()
+        self.response_class = Mock
+        self.url = Chibi_url(
+            "https://google.com", response_class=self.response_class )
+
+    def test_with_dict_should_mainteing_the_response_class( self ):
+        result = self.url + { 'param1': 'value1' }
+        self.assertEqual( result.response_class, self.response_class )
+
+    def test_with_str_should_mainteing_the_response_class( self ):
+        result = self.url + 'cosa'
+        self.assertEqual( result.response_class, self.response_class )
+
+    def test_with_query_should_mainteing_the_response_class( self ):
+        result = self.url + "?param1=value1"
+        self.assertEqual( result.response_class, self.response_class )
+
+    def test_with_book_should_mainteing_the_response_class( self ):
+        book = Book( page=20, page_size=10, total_elements=1000 )
+        result = self.url + book
+        self.assertEqual( result.response_class, self.response_class )
 
 
 class Test_property( Test_url ):
