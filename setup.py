@@ -11,7 +11,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ 'chibi>=0.5.5', 'requests>=2.22.0' ]
+requirements = [ 'chibi>=0.5.5', 'requests>=2.22.0', 'marshmallow==3.4.0' ]
 
 setup(
     author="Dem4ply",

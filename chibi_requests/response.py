@@ -1,8 +1,12 @@
+from marshmallow import Schema
+
 from chibi.atlas import Chibi_atlas_ignore_case
 from chibi.atlas import _wrap
 
 
 class Response:
+    serializer = None
+
     def __init__( self, response, url ):
         self._response = response
         self.url = url
@@ -64,7 +68,7 @@ class Response:
     def parse_like_xml( self ):
         raise NotImplementedError
 
-    def parse_native( self ):
+    def parse_content_type( self ):
         if self.is_json:
             return self.parse_like_json()
         elif self.is_xml:
@@ -73,3 +77,34 @@ class Response:
             return self.body
         else:
             raise NotImplementedError
+
+    def get_serializer( self ):
+        if self.serializer is None:
+            return None
+        if isinstance( self.serializer, type ):
+            serializer = self.serializer
+            if issubclass( serializer, Schema ):
+                return serializer
+            else:
+                raise NotImplementedError(
+                    'No implementados los serializadores que '
+                    'no son de marshmallow' )
+        elif isinstance( self.serializer, Schema ):
+            return type( self.serializer )
+        else:
+            raise NotImplementedError(
+                'No implementados los serializadores que '
+                'no son de marshmallow' )
+
+    def parse_native( self ):
+        parse = self.parse_content_type()
+        serializer = self.get_serializer()
+        if serializer:
+            many = self.native_is_many
+            parse = serializer().load( parse, many=many )
+        return parse
+
+    @property
+    def native_is_many( self ):
+        parse = self.parse_content_type()
+        return isinstance( parse, list )

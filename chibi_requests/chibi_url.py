@@ -5,7 +5,11 @@ from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 from chibi_requests.response import Response
 
 from chibi.atlas import Chibi_atlas
+import logging
 from chibi.metaphors import Book
+
+
+logger = logging.getLogger( 'chibi_requests.chibi_url' )
 
 
 class Chibi_url( str ):
@@ -92,10 +96,12 @@ class Chibi_url( str ):
             result, response_class=self.response_class, **kw, **self.kw )
 
     def get( self, *args, **kw ):
+        logger.info( f"[GET] '{self}'" )
         response = requests.get( str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
     def post( self, *args, **kw ):
+        logger.info( f"[POST] '{self}'" )
         response = requests.post( str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
