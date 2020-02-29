@@ -11,12 +11,12 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ 'chibi>=0.5.5', 'requests>=2.22.0' ]
+requirements = [ 'chibi>=0.7.4', 'requests>=2.22.0' ]
 
 setup(
     author="Dem4ply",
     author_email='dem4ply@gmail.com',
-    python_requires='>=3.0',
+    python_requires='>=3.7',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
