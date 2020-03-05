@@ -18,26 +18,14 @@ class Chibi_url( str ):
     def __add__( self, other ):
         if isinstance( other, Chibi_url ):
             raise NotImplementedError
-        if isinstance( other, str ) and other.startswith( '?' ):
-            parts = list( urlparse( self ) )
-            current = parse_qs( parts[4], keep_blank_values=True )
-            news = parse_qs( other[1:], keep_blank_values=True )
-            current.update( news )
-            parts[4] = urlencode( current, doseq=True )
-            return Chibi_url( urlunparse( parts ),
-                response_class=self.response_class )
+        elif isinstance( other, str ) and other.startswith( '?' ):
+            return self.__add__str__( other )
         elif isinstance( other, dict ):
-            parts = list( urlparse( self ) )
-            current = parse_qs( parts[4], keep_blank_values=True )
-            current.update( other )
-            parts[4] = urlencode( current, doseq=True )
-            return Chibi_url( urlunparse( parts ),
-                response_class=self.response_class )
+            return self.__add__dict__( other )
         elif isinstance( other, AuthBase ):
-            self.auth = other
-            return copy.copy( self )
+            return self.__add__auth__( other )
         elif isinstance( other, Book ):
-            return self + other.offset
+            return self.__add__book__( other )
         return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
             response_class=self.response_class )
 
@@ -112,3 +100,28 @@ class Chibi_url( str ):
             self.kw.auth = value
         else:
             raise NotImplementedError
+
+    def __add__str__( self, other ):
+        if other.startswith( '?' ):
+            parts = list( urlparse( self ) )
+            current = parse_qs( parts[4], keep_blank_values=True )
+            news = parse_qs( other[1:], keep_blank_values=True )
+            current.update( news )
+            parts[4] = urlencode( current, doseq=True )
+            return Chibi_url( urlunparse( parts ),
+                response_class=self.response_class )
+
+    def __add__dict__( self, other ):
+            parts = list( urlparse( self ) )
+            current = parse_qs( parts[4], keep_blank_values=True )
+            current.update( other )
+            parts[4] = urlencode( current, doseq=True )
+            return Chibi_url( urlunparse( parts ),
+                response_class=self.response_class )
+
+    def __add__auth__( self, other ):
+            self.auth = other
+            return copy.copy( self )
+
+    def __add__book__( self, other ):
+            return self + other.offset
