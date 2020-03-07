@@ -1,11 +1,13 @@
 import copy
 import requests
 from requests.auth import AuthBase
+from requests import Session
 from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 from chibi_requests.response import Response
 
 from chibi.atlas import Chibi_atlas
 from chibi.metaphors import Book
+from chibi.file import Chibi_path
 
 
 class Chibi_url( str ):
@@ -18,16 +20,30 @@ class Chibi_url( str ):
     def __add__( self, other ):
         if isinstance( other, Chibi_url ):
             raise NotImplementedError
-        elif isinstance( other, str ) and other.startswith( '?' ):
+        elif isinstance( other, str ):
             return self.__add__str__( other )
         elif isinstance( other, dict ):
             return self.__add__dict__( other )
-        elif isinstance( other, AuthBase ):
-            return self.__add__auth__( other )
         elif isinstance( other, Book ):
             return self.__add__book__( other )
-        return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
-            response_class=self.response_class )
+        elif isinstance( other, AuthBase ):
+            return self.__add__auth__( other )
+        elif isinstance( other, Session ):
+            return self.__add__session__( other )
+        else:
+            raise NotImplementedError(
+                f"no esta implementada la suma con el tipo "
+                f"'{type(other)}' de {other}" )
+
+    def __iadd__( self, other ):
+        if isinstance( other, AuthBase ):
+            return self.__iadd__auth__( other )
+        elif isinstance( other, Session ):
+            return self.__iadd__session__( other )
+        else:
+            raise NotImplementedError(
+                f"no esta implementada la suma con el tipo "
+                f"'{type(other)}' de {other}" )
 
     def __eq__( self, other ):
         if isinstance( other, Chibi_url ):
@@ -87,10 +103,43 @@ class Chibi_url( str ):
         response = requests.post( str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
+    def download( self, path, *args, chunk_size=8192, **kw ):
+        """
+        descarga archivos o lo que sea de una url
+
+        Parameters
+        ==========
+        path: Chibi_path
+            ruta donde se descargara el archivo
+            si es in directorio usara genera el nombr edel archivo
+            usando la url
+        chunk_size: int ( optional )
+            tamanno de los chunks
+
+        Returns
+        =======
+        Chibi_path
+            ruta del archivo descargado
+        """
+        path = Chibi_path( path )
+        if path.is_a_folder:
+            path += self.base_name
+
+        response = requests.get(
+            str( self ), *args, **kw, auth=self.auth, stream=True, )
+
+        response.raise_for_status()
+
+        f = path.open()
+        for chunk in response.iter_content( chunk_size=chunk_size ):
+            if chunk:
+                f.append( chunk )
+        return path
+
     @property
     def auth( self ):
         try:
-            return self.kw._auth
+            return self.kw.auth
         except AttributeError:
             return None
 
@@ -98,6 +147,20 @@ class Chibi_url( str ):
     def auth( self, value ):
         if isinstance( value, AuthBase ):
             self.kw.auth = value
+        else:
+            raise NotImplementedError
+
+    @property
+    def session( self ):
+        try:
+            return self.kw.session
+        except AttributeError:
+            return None
+
+    @session.setter
+    def session( self, value ):
+        if isinstance( value, Session ):
+            self.kw.session = value
         else:
             raise NotImplementedError
 
@@ -109,19 +172,43 @@ class Chibi_url( str ):
             current.update( news )
             parts[4] = urlencode( current, doseq=True )
             return Chibi_url( urlunparse( parts ),
-                response_class=self.response_class )
+                response_class=self.response_class, **self.kw )
+        elif other.startswith( '/' ):
+            parts = list( urlparse( self ) )
+            parts[2] = other
+            return Chibi_url( urlunparse( parts ),
+                response_class=self.response_class, **self.kw )
+            return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
+                response_class=self.response_class, **self.kw )
+        else:
+            return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
+                response_class=self.response_class, **self.kw )
 
     def __add__dict__( self, other ):
-            parts = list( urlparse( self ) )
-            current = parse_qs( parts[4], keep_blank_values=True )
-            current.update( other )
-            parts[4] = urlencode( current, doseq=True )
-            return Chibi_url( urlunparse( parts ),
-                response_class=self.response_class )
-
-    def __add__auth__( self, other ):
-            self.auth = other
-            return copy.copy( self )
+        parts = list( urlparse( self ) )
+        current = parse_qs( parts[4], keep_blank_values=True )
+        current.update( other )
+        parts[4] = urlencode( current, doseq=True )
+        return Chibi_url( urlunparse( parts ),
+            response_class=self.response_class, **self.kw )
 
     def __add__book__( self, other ):
-            return self + other.offset
+        return self + other.offset
+
+    def __add__session__( self, other ):
+        url = copy.copy( self )
+        url += other
+        return url
+
+    def __add__auth__( self, other ):
+        url = copy.copy( self )
+        url += other
+        return url
+
+    def __iadd__session__( self, other ):
+        self.session = other
+        return self
+
+    def __iadd__auth__( self, other ):
+        self.auth = other
+        return self

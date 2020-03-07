@@ -1,5 +1,6 @@
 from chibi.atlas import Chibi_atlas_ignore_case
 from chibi.atlas import _wrap
+from bs4 import BeautifulSoup
 
 
 class Response:
@@ -54,6 +55,10 @@ class Response:
         return 'text/plain' in self.content_type
 
     @property
+    def is_html( self ):
+        return 'text/html' in self.content_type
+
+    @property
     def status_code( self ):
         return self._response.status_code
 
@@ -69,7 +74,10 @@ class Response:
             return self.parse_like_json()
         elif self.is_xml:
             return self.parse_like_xml()
+        elif self.is_html:
+            return BeautifulSoup( self.body, 'html.parser' )
         elif self.is_text:
             return self.body
         else:
-            raise NotImplementedError
+            raise NotImplementedError(
+                f'no puede parsear el content-type: {self.content_type}' )

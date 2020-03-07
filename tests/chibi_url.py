@@ -1,9 +1,12 @@
 from chibi_requests import Chibi_url, Response
+from chibi.file.temp import Chibi_temp_path
 from chibi.atlas import Chibi_atlas
 from unittest import TestCase
 from unittest.mock import Mock, patch
 from requests.auth import HTTPBasicAuth
+import requests
 from chibi.metaphors import Book
+from bs4 import BeautifulSoup
 
 
 class Test_url( TestCase ):
@@ -27,6 +30,10 @@ class Test_url_add( Test_url ):
         self.assertEqual(
             "https://google.com/cosa/cosa2/cosa3",
             ( self.url + "cosa/cosa2" ) + "cosa3" )
+
+        self.assertEqual(
+            "https://google.com/cosa4",
+            ( self.url + "cosa/cosa2" ) + '/cosa4' )
 
     def test_add_a_query( self ):
         result = self.url + "?param1=value1"
@@ -53,6 +60,7 @@ class Test_url_add( Test_url ):
         result = self.url + book
         offset = { k: str( v ) for k, v in book.offset.items() }
         self.assertEqual( result.params, offset )
+
 
 
 class Test_add_mainteing_the_response_class( Test_url ):
@@ -111,6 +119,24 @@ class Test_methods( Test_url ):
         self.assertTrue( response.native )
 
 
+class Test_download_lenna( TestCase ):
+    def setUp( self ):
+        self.download_folder = Chibi_temp_path()
+        self.lenna_url = Chibi_url( 'http://www.lenna.org/len_std.jpg' )
+
+    def test_download_lenna( self ):
+        lenna = self.lenna_url.download( self.download_folder )
+        self.assertTrue( lenna.exists )
+        self.assertGreater( lenna.properties.size, 10000 )
+
+    def test_download_wiith_file_name( self ):
+        lenna = self.lenna_url.download(
+            self.download_folder + 'helloooo_lenna.png' )
+        self.assertEqual( lenna.base_name, 'helloooo_lenna.png' )
+        self.assertTrue( lenna.exists )
+        self.assertGreater( lenna.properties.size, 10000 )
+
+
 class Test_meta( Test_url ):
     def test_meta_empty( self ):
         self.assertEqual( self.url.kw, {} )
@@ -163,7 +189,23 @@ class Test_auth( Test_url ):
     def test_when_add_a_auth_class_should_create_a_new_object( self ):
         url_other = self.url + HTTPBasicAuth( 'some_user', 'some_password' )
         self.assertIsNot( self.url, url_other )
-        self.assertEqual( self.url, url_other )
+        self.assertEqual( str( self.url ), str( url_other ) )
+        self.assertIsNotNone( url_other.auth )
+        self.assertIsNone( self.url.auth )
+
+    def test_using_iadd_should_add_iternaly_the_auth( self ):
+        auth = HTTPBasicAuth( 'some_user', 'some_password' )
+        self.url += auth
+        self.assertIsNotNone( self.url.auth )
+        self.assertEqual( self.url.auth, auth )
+
+    def test_add_parmas_to_the_url_shoudl_carry_the_auth( self ):
+        auth = HTTPBasicAuth( 'some_user', 'some_password' )
+        self.url += auth
+        other_url = self.url + { 'param1': 'value1' }
+
+        self.assertNotEqual( self.url , other_url )
+        self.assertEqual( self.url.auth, other_url.auth )
 
     @patch( 'requests.get' )
     def test_should_send_the_auth_using_get( self, requests ):
@@ -176,3 +218,40 @@ class Test_auth( Test_url ):
         self.url += HTTPBasicAuth( 'some_user', 'some_password' )
         self.url.post()
         self.assertEqual( requests.call_args[1][ 'auth' ], self.url.auth )
+
+
+def Test_session( Test_url ):
+    def test_add_a_session_should_create_a_new_url( self ):
+        session = requests.Session()
+        url_other = self.url + session
+        self.assertIsNot( self.url, url_other )
+        self.assertEqual( str( self.url ), str( url_other ) )
+        self.assertIsNotNone( url_other.session )
+        self.assertIsNone( self.url.session )
+
+    def test_iadd_a_session_should_create_a_new_url( self ):
+        session = requests.Session()
+        self.url += session
+        self.assertEqual( self.url.session, session )
+        self.assertIsNotNone( self.url.session )
+
+    def test_add_parmas_to_the_url_shoudl_carry_the_session( self ):
+        session = requests.Session()
+        self.url += session
+        other_url = self.url + { 'param1': 'value1' }
+
+        self.assertNotEqual( self.url , other_url )
+        self.assertEqual( self.url.session, other_url.session )
+
+
+class Test_html_parser( Test_url ):
+    def setUp( self ):
+        self.url = Chibi_url( 'http://www.google.com' )
+
+    def test_get( self ):
+        response = self.url.get()
+        self.assertTrue( response )
+        self.assertIsInstance( response, Response )
+        self.assertTrue( response.is_html )
+        self.assertIsInstance( response.native, BeautifulSoup )
+        self.assertTrue( response.native )
