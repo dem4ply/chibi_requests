@@ -1,6 +1,8 @@
 from chibi.atlas import Chibi_atlas_ignore_case
 from chibi.atlas import _wrap
 from bs4 import BeautifulSoup
+from chibi.atlas import loads
+from xmltodict import parse
 
 
 class Response:
@@ -48,7 +50,10 @@ class Response:
 
     @property
     def is_xml( self ):
-        return self.content_type == 'application/xml'
+        return (
+            self.content_type == 'application/xml'
+            or 'text/xml' in self.content_type
+        )
 
     @property
     def is_text( self ):
@@ -67,7 +72,7 @@ class Response:
         return _wrap( json_result )
 
     def parse_like_xml( self ):
-        raise NotImplementedError
+        return loads( self.body )
 
     def parse_native( self ):
         if self.is_json:

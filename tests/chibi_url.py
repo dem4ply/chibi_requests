@@ -1,12 +1,14 @@
-from chibi_requests import Chibi_url, Response
-from chibi.file.temp import Chibi_temp_path
-from chibi.atlas import Chibi_atlas
 from unittest import TestCase
 from unittest.mock import Mock, patch
-from requests.auth import HTTPBasicAuth
+
 import requests
-from chibi.metaphors import Book
 from bs4 import BeautifulSoup
+from chibi.atlas import Chibi_atlas
+from chibi.file.temp import Chibi_temp_path
+from chibi.metaphors import Book
+from requests.auth import HTTPBasicAuth
+
+from chibi_requests import Chibi_url, Response
 
 
 class Test_url( TestCase ):
@@ -55,12 +57,20 @@ class Test_url_add( Test_url ):
         self.assertEqual(
             { 'param1': 'value1', 'param2': 'value2' }, result.params )
 
+    def test_add_root_with_parameters_should_be_removed( self ):
+        result = self.url + { 'param1': 'value1' }
+        result = result + '/cosa1'
+        self.assertEqual( result, self.url + '/cosa1' )
+
     def test_add_a_book_should_add_the_query( self ):
         book = Book( page=20, page_size=10, total_elements=1000 )
         result = self.url + book
         offset = { k: str( v ) for k, v in book.offset.items() }
         self.assertEqual( result.params, offset )
 
+    def test_add_a_complete_url_should_renplace_all( self ):
+        result = self.url + 'http://ifconfig.me'
+        self.assertEqual( result, 'http://ifconfig.me' )
 
 
 class Test_add_mainteing_the_response_class( Test_url ):
@@ -220,7 +230,7 @@ class Test_auth( Test_url ):
         self.assertEqual( requests.call_args[1][ 'auth' ], self.url.auth )
 
 
-def Test_session( Test_url ):
+class Test_session( Test_url ):
     def test_add_a_session_should_create_a_new_url( self ):
         session = requests.Session()
         url_other = self.url + session
@@ -243,11 +253,22 @@ def Test_session( Test_url ):
         self.assertNotEqual( self.url , other_url )
         self.assertEqual( self.url.session, other_url.session )
 
+    @patch( 'requests.Session.get' )
+    def test_should_use_the_session_when_using_get( self, get ):
+        session = requests.Session()
+        self.url += session
+        self.url.get()
+        get.assert_called()
+
+    @patch( 'requests.Session.post' )
+    def test_should_use_the_session_when_using_post( self, post ):
+        session = requests.Session()
+        self.url += session
+        self.url.post()
+        post.assert_called()
+
 
 class Test_html_parser( Test_url ):
-    def setUp( self ):
-        self.url = Chibi_url( 'http://www.google.com' )
-
     def test_get( self ):
         response = self.url.get()
         self.assertTrue( response )
@@ -255,3 +276,14 @@ class Test_html_parser( Test_url ):
         self.assertTrue( response.is_html )
         self.assertIsInstance( response.native, BeautifulSoup )
         self.assertTrue( response.native )
+
+
+class Test_properties( Test_url ):
+    def test_url( self ):
+        with self.subTest( "is a chibi_url" ):
+            self.assertIsInstance( self.url.url, Chibi_url )
+        with self.subTest( "normal url are equals" ):
+            self.assertEqual( self.url, self.url.url )
+        with self.subTest( "with parans url are equals" ):
+            url = self.url + { 'param': 'value' }
+            self.assertEqual( self.url, url.url )

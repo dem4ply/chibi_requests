@@ -1,5 +1,6 @@
 import copy
 import requests
+import logging
 from requests.auth import AuthBase
 from requests import Session
 from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
@@ -8,6 +9,9 @@ from chibi_requests.response import Response
 from chibi.atlas import Chibi_atlas
 from chibi.metaphors import Book
 from chibi.file import Chibi_path
+
+
+logger = logging.getLogger( 'chibi_request.url' )
 
 
 class Chibi_url( str ):
@@ -90,17 +94,25 @@ class Chibi_url( str ):
     def host( self ):
         return self.parts[1]
 
+    @property
+    def url( self ):
+        parts = self.parts
+        parts[4] = ''
+        return type( self )( urlunparse( parts ) )
+
     def format( self, *args, **kw ):
         result = super().format( *args, **kw )
         return type( self )(
             result, response_class=self.response_class, **kw, **self.kw )
 
     def get( self, *args, **kw ):
-        response = requests.get( str( self ), *args, auth=self.auth, **kw )
+        logger.info( f"GET '{self}'" )
+        response = self.requests.get( str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
     def post( self, *args, **kw ):
-        response = requests.post( str( self ), *args, auth=self.auth, **kw )
+        logger.info( f"POST '{self}'" )
+        response = self.requests.post( str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
     def download( self, path, *args, chunk_size=8192, **kw ):
@@ -125,7 +137,8 @@ class Chibi_url( str ):
         if path.is_a_folder:
             path += self.base_name
 
-        response = requests.get(
+        logger.info( f"DOWNLOAD '{self}' into {path}" )
+        response = self.requests.get(
             str( self ), *args, **kw, auth=self.auth, stream=True, )
 
         response.raise_for_status()
@@ -174,12 +187,15 @@ class Chibi_url( str ):
             return Chibi_url( urlunparse( parts ),
                 response_class=self.response_class, **self.kw )
         elif other.startswith( '/' ):
-            parts = list( urlparse( self ) )
+            parts = list( urlparse( self.url ) )
             parts[2] = other
             return Chibi_url( urlunparse( parts ),
                 response_class=self.response_class, **self.kw )
             return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
                 response_class=self.response_class, **self.kw )
+        elif other.startswith( 'http' ):
+            return Chibi_url(
+                other, response_class=self.response_class, **self.kw )
         else:
             return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
                 response_class=self.response_class, **self.kw )
@@ -212,3 +228,10 @@ class Chibi_url( str ):
     def __iadd__auth__( self, other ):
         self.auth = other
         return self
+
+    @property
+    def requests( self ):
+        if self.session:
+            return self.session
+        else:
+            return requests
