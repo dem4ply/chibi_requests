@@ -1,6 +1,10 @@
 from bs4 import BeautifulSoup
 from chibi.atlas import Chibi_atlas_ignore_case, _wrap, loads
 from marshmallow import Schema
+from marshmallow import Schema
+
+from chibi.atlas import Chibi_atlas_ignore_case
+from chibi.atlas import _wrap
 
 
 class Response:

@@ -7,11 +7,12 @@ from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 from chibi_requests.response import Response
 
 from chibi.atlas import Chibi_atlas
+import logging
 from chibi.metaphors import Book
 from chibi.file import Chibi_path
 
 
-logger = logging.getLogger( 'chibi_request.url' )
+logger = logging.getLogger( 'chibi_requests.chibi_url' )
 
 
 class Chibi_url( str ):
