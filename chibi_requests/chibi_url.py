@@ -1,15 +1,15 @@
 import copy
-import requests
 import logging
-from requests.auth import AuthBase
-from requests import Session
 from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
-from chibi_requests.response import Response
 
+import requests
 from chibi.atlas import Chibi_atlas
-import logging
-from chibi.metaphors import Book
 from chibi.file import Chibi_path
+from chibi.metaphors import Book
+from requests import Session
+from requests.auth import AuthBase
+
+from chibi_requests.response import Response
 
 
 logger = logging.getLogger( 'chibi_requests.chibi_url' )
