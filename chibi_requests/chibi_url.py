@@ -108,12 +108,26 @@ class Chibi_url( str ):
 
     def get( self, *args, **kw ):
         logger.info( f"GET '{self}'" )
-        response = self.requests.get( str( self ), *args, auth=self.auth, **kw )
+        response = self.requests.get(
+            str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
     def post( self, *args, **kw ):
         logger.info( f"POST '{self}'" )
-        response = self.requests.post( str( self ), *args, auth=self.auth, **kw )
+        response = self.requests.post(
+            str( self ), *args, auth=self.auth, **kw )
+        return self.response_class( response, self )
+
+    def put( self, *args, **kw ):
+        logger.info( f"PUT '{self}'" )
+        response = self.requests.put(
+            str( self ), *args, auth=self.auth, **kw )
+        return self.response_class( response, self )
+
+    def delete( self, *args, **kw ):
+        logger.info( f"DELETE '{self}'" )
+        response = self.requests.delete(
+            str( self ), *args, auth=self.auth, **kw )
         return self.response_class( response, self )
 
     def download( self, path, *args, chunk_size=8192, **kw ):
