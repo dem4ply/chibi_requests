@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from chibi.atlas import Chibi_atlas_ignore_case, _wrap, loads
+from chibi.atlas import Chibi_atlas_ignore_case, _wrap, loads, Atlas
 from marshmallow import Schema
 
 
@@ -111,6 +111,8 @@ class Response:
         if serializer:
             many = self.native_is_many
             parse = serializer().load( parse, many=many )
+            if isinstance( parse, ( dict, list ) ):
+                parse = Atlas( parse )
         return parse
 
     @property

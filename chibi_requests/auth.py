@@ -10,6 +10,9 @@ class Token( AuthBase ):
         request.headers[ 'Authorization' ] = f'{self._name} {self._token}'
         return request
 
+    def __str__( self ):
+        return f"{self._name} {self._token}"
+
 
 class Bearer( Token ):
     def __init__( self, *, token, name='Bearer' ):

@@ -69,6 +69,8 @@ class Chibi_url( str ):
 
     @property
     def base_name( self ):
+        if self[-1] == '/':
+            return self.rsplit( '/', 2 )[-2]
         return self.rsplit( '/', 1 )[-1]
 
     @property
@@ -94,6 +96,10 @@ class Chibi_url( str ):
     @property
     def host( self ):
         return self.parts[1]
+
+    @property
+    def path( self ):
+        return self.parts[2]
 
     @property
     def url( self ):
