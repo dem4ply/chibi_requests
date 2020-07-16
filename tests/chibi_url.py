@@ -287,3 +287,38 @@ class Test_properties( Test_url ):
         with self.subTest( "with parans url are equals" ):
             url = self.url + { 'param': 'value' }
             self.assertEqual( self.url, url.url )
+
+
+class Test_headers( Test_url ):
+    def setUp( self ):
+        super().setUp()
+        self.url = Chibi_url( 'http://a.4cdn.org/{board}/threads.json' )
+
+    def test_headers_by_default_should_be_a_empty_dict( self ):
+        self.assertIsInstance( self.url.headers, dict )
+        self.assertEqual( self.url.headers, {} )
+
+    def test_should_add_the_content_type( self ):
+        self.url.headers.content_type = 'application/json'
+        self.assertEqual( self.url.headers.content_type, 'application/json' )
+
+    @patch( 'requests.get' )
+    def test_should_send_the_auth_using_get( self, requests ):
+        self.url.headers.content_type = 'application/json'
+        self.url.get()
+        self.assertEqual(
+            requests.call_args[1][ 'headers' ], self.url.headers )
+
+    @patch( 'requests.post' )
+    def test_should_send_the_auth_using_post( self, requests ):
+        self.url.headers.content_type = 'application/json'
+        self.url.post()
+        self.assertEqual(
+            requests.call_args[1][ 'headers' ], self.url.headers )
+
+    @patch( 'requests.post' )
+    def test_should_be_parse_data_with_content_type( self, requests ):
+        self.url.headers.content_type = 'application/json'
+        self.url.post( { 'data': 'asdf' } )
+        j = requests.call_args[0][1]
+        self.assertEqual( j, '{"data": "asdf"}' )

@@ -110,7 +110,9 @@ class Response:
         serializer = self.get_serializer()
         if serializer:
             many = self.native_is_many
-            parse = serializer().load( parse, many=many )
+            serializer = serializer()
+            serializer.context[ 'url' ] = self.url
+            parse = serializer.load( parse, many=many )
             if isinstance( parse, ( dict, list ) ):
                 parse = Atlas( parse )
         return parse

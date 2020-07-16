@@ -1,9 +1,10 @@
+import json
 import copy
 import logging
 from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 
 import requests
-from chibi.atlas import Chibi_atlas
+from chibi.atlas import Chibi_atlas, Chibi_atlas_default
 from chibi.file import Chibi_path
 from chibi.metaphors import Book
 from requests import Session
@@ -16,10 +17,14 @@ logger = logging.getLogger( 'chibi_requests.chibi_url' )
 
 
 class Chibi_url( str ):
-    def __new__( cls, *args, **kw ):
+    def __new__( cls, *args, headers=None, **kw ):
         obj = str.__new__( cls, *args )
         obj.response_class = kw.pop( 'response_class', Response )
         obj.kw = Chibi_atlas( kw )
+        if headers is None:
+            obj._headers = Chibi_atlas_default( str )
+        else:
+            obj._headers = Chibi_atlas_default( str, headers )
         return obj
 
     def __add__( self, other ):
@@ -65,7 +70,7 @@ class Chibi_url( str ):
         v = kw[ 'kw' ]
         kw = dict( **kw, **v )
         del kw[ 'kw' ]
-        return type( self )( self, **kw )
+        return type( self )( self, **kw, headers=self.headers )
 
     @property
     def base_name( self ):
@@ -114,26 +119,30 @@ class Chibi_url( str ):
 
     def get( self, *args, **kw ):
         logger.info( f"GET '{self}'" )
+        args = self._parse_arguments( *args )
         response = self.requests.get(
-            str( self ), *args, auth=self.auth, **kw )
+            str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
 
     def post( self, *args, **kw ):
         logger.info( f"POST '{self}'" )
+        args = self._parse_arguments( *args )
         response = self.requests.post(
-            str( self ), *args, auth=self.auth, **kw )
+            str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
 
     def put( self, *args, **kw ):
         logger.info( f"PUT '{self}'" )
+        args = self._parse_arguments( *args )
         response = self.requests.put(
-            str( self ), *args, auth=self.auth, **kw )
+            str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
 
     def delete( self, *args, **kw ):
         logger.info( f"DELETE '{self}'" )
+        args = self._parse_arguments( *args )
         response = self.requests.delete(
-            str( self ), *args, auth=self.auth, **kw )
+            str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
 
     def download( self, path, *args, chunk_size=8192, **kw ):
@@ -160,7 +169,8 @@ class Chibi_url( str ):
 
         logger.info( f"DOWNLOAD '{self}' into {path}" )
         response = self.requests.get(
-            str( self ), *args, **kw, auth=self.auth, stream=True, )
+            str( self ), *args, **kw, headers=self.headers,
+            auth=self.auth, stream=True, )
 
         response.raise_for_status()
 
@@ -256,3 +266,14 @@ class Chibi_url( str ):
             return self.session
         else:
             return requests
+
+    @property
+    def headers( self ):
+        return self._headers
+
+    def _parse_arguments( self, *args ):
+        if not args:
+            return args
+        if self.headers.content_type == 'application/json':
+            data = json.dumps( args[0] )
+            return data, *args[1:]
