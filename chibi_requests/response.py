@@ -121,3 +121,7 @@ class Response:
     def native_is_many( self ):
         parse = self.parse_content_type()
         return isinstance( parse, list )
+
+    @property
+    def ok( self ):
+        return self.status_code == 200

@@ -276,4 +276,4 @@ class Chibi_url( str ):
             return args
         if self.headers.content_type == 'application/json':
             data = json.dumps( args[0] )
-            return data, *args[1:]
+            return tuple( ( data, *args[1:] ) )
