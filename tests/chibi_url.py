@@ -23,6 +23,18 @@ class Test_base_name( Test_url ):
         self.assertEqual( "1234567", base_name )
 
 
+class Test_dir_name( Test_url ):
+    def test_dir_name_should_return_the_last_part( self ):
+        url = self.url + 'asdf' + "1234567"
+        path = url.dir_name
+        self.assertEqual( self.url + 'asdf', path )
+
+    def test_dir_name_should_be_a_chibi_url( self ):
+        url = self.url + 'asdf' + "1234567"
+        path = url.dir_name
+        self.assertIsInstance( path, Chibi_url )
+
+
 class Test_url_add( Test_url ):
     def test_can_add_parts( self ):
         self.assertIsInstance( self.url + "cosa", Chibi_url )

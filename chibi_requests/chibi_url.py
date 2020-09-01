@@ -79,6 +79,12 @@ class Chibi_url( str ):
         return self.rsplit( '/', 1 )[-1]
 
     @property
+    def dir_name( self ):
+        if self[-1] == '/':
+            return self.rsplit( '/', 2 )[-3]
+        return type( self )( self.rsplit( '/', 1 )[0] )
+
+    @property
     def parts( self ):
         try:
             return self._parts
