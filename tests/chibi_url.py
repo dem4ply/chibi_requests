@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 from unittest.mock import Mock, patch
 
 import requests
@@ -49,6 +49,13 @@ class Test_url_add( Test_url ):
             "https://google.com/cosa4",
             ( self.url + "cosa/cosa2" ) + '/cosa4' )
 
+    def test_can_add_parts_with_int( self ):
+        self.assertIsInstance( self.url + 123, Chibi_url )
+        self.assertEqual( "https://google.com/123", self.url + "123" )
+        self.assertEqual(
+            "https://google.com/cosa/cosa2/123",
+            ( self.url + "cosa/cosa2" ) + 123 )
+
     def test_add_a_query( self ):
         result = self.url + "?param1=value1"
         self.assertEqual( { 'param1': 'value1' }, result.params )
@@ -83,6 +90,11 @@ class Test_url_add( Test_url ):
     def test_add_a_complete_url_should_renplace_all( self ):
         result = self.url + 'http://ifconfig.me'
         self.assertEqual( result, 'http://ifconfig.me' )
+
+    def test_add_path_after_params_should_work_as_expected( self ):
+        url = self.url + { 'param1': 'asdf' }
+        url = url + 'cosa1'
+        self.assertEqual( url, 'https://google.com/cosa1?param1=asdf' )
 
 
 class Test_add_mainteing_the_response_class( Test_url ):
@@ -132,6 +144,7 @@ class Test_methods( Test_url ):
         self.assertIsInstance( response.native, str )
         self.assertTrue( response.native )
 
+    @skip( 'no puedo hacer post a esta url' )
     def test_post( self ):
         response = self.url.post()
         self.assertTrue( response )

@@ -40,6 +40,8 @@ class Chibi_url( str ):
             return self.__add__auth__( other )
         elif isinstance( other, Session ):
             return self.__add__session__( other )
+        elif isinstance( other, int ):
+            return self.__add__str__( str( other ) )
         else:
             raise NotImplementedError(
                 f"no esta implementada la suma con el tipo "
@@ -86,6 +88,7 @@ class Chibi_url( str ):
 
     @property
     def parts( self ):
+        return list( urlparse( self ) )
         try:
             return self._parts
         except AttributeError:
@@ -124,28 +127,28 @@ class Chibi_url( str ):
             result, response_class=self.response_class, **kw, **self.kw )
 
     def get( self, *args, **kw ):
-        logger.info( f"GET '{self}'" )
+        logger.info( f'GET "{self}"' )
         args = self._parse_arguments( *args )
         response = self.requests.get(
             str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
 
     def post( self, *args, **kw ):
-        logger.info( f"POST '{self}'" )
+        logger.info( f'POST "{self}"' )
         args = self._parse_arguments( *args )
         response = self.requests.post(
             str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
 
     def put( self, *args, **kw ):
-        logger.info( f"PUT '{self}'" )
+        logger.info( f'PUT "{self}"' )
         args = self._parse_arguments( *args )
         response = self.requests.put(
             str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
 
     def delete( self, *args, **kw ):
-        logger.info( f"DELETE '{self}'" )
+        logger.info( f'DELETE "{self}"' )
         args = self._parse_arguments( *args )
         response = self.requests.delete(
             str( self ), *args, auth=self.auth, headers=self.headers, **kw )
@@ -173,7 +176,7 @@ class Chibi_url( str ):
         if path.is_a_folder:
             path += self.base_name
 
-        logger.info( f"DOWNLOAD '{self}' into {path}" )
+        logger.info( f'DOWNLOAD "{self}" into "{path}"' )
         response = self.requests.get(
             str( self ), *args, **kw, headers=self.headers,
             auth=self.auth, stream=True, )
@@ -234,8 +237,10 @@ class Chibi_url( str ):
             return Chibi_url(
                 other, response_class=self.response_class, **self.kw )
         else:
-            return Chibi_url( "/".join( self.split( '/' ) + [ other ] ),
+            new_url = Chibi_url(
+                "/".join( self.url.split( '/' ) + [ other ] ),
                 response_class=self.response_class, **self.kw )
+            return new_url + self.params
 
     def __add__dict__( self, other ):
         parts = list( urlparse( self ) )

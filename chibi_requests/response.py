@@ -31,10 +31,14 @@ class Response:
             return self._native
 
     @property
+    def content( self ):
+        return self._response.content
+
+    @property
     def pagination( self ):
         try:
             return self._pagination
-        except AssertionError:
+        except AttributeError:
             raise NotImplementedError(
                 "in the response {} is not implemented the pagination".format(
                     str( type( self ) )
@@ -125,3 +129,6 @@ class Response:
     @property
     def ok( self ):
         return self.status_code == 200
+
+    def __bool__( self ):
+        return self.ok
