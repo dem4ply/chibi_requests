@@ -144,6 +144,21 @@ class Test_methods( Test_url ):
         self.assertIsInstance( response.native, str )
         self.assertTrue( response.native )
 
+    @patch( 'requests.get' )
+    def test_get_verify_global_should_be_added( self, get ):
+        self.url = Chibi_url( 'http://ifconfig.me', verify=False )
+        response = self.url.get()
+        self.assertIn( 'verify', get.call_args[1] )
+        self.assertIsNotNone( get.call_args[1]['verify'] )
+        self.assertFalse( get.call_args[1]['verify'] )
+
+    @patch( 'requests.get' )
+    def test_get_verify_should_be_added( self, get ):
+        response = self.url.get( verify=False )
+        self.assertIn( 'verify', get.call_args[1] )
+        self.assertIsNotNone( get.call_args[1]['verify'] )
+        self.assertFalse( get.call_args[1]['verify'] )
+
     @skip( 'no puedo hacer post a esta url' )
     def test_post( self ):
         response = self.url.post()
@@ -152,6 +167,51 @@ class Test_methods( Test_url ):
         self.assertTrue( response.is_json )
         self.assertIsInstance( response.native, Chibi_atlas )
         self.assertTrue( response.native )
+
+    @patch( 'requests.post' )
+    def test_post_verify_global_should_be_added( self, post ):
+        self.url = Chibi_url( 'http://ifconfig.me', verify=False )
+        response = self.url.post()
+        self.assertIn( 'verify', post.call_args[1] )
+        self.assertIsNotNone( post.call_args[1]['verify'] )
+        self.assertFalse( post.call_args[1]['verify'] )
+
+    @patch( 'requests.post' )
+    def test_post_verify_should_be_added( self, post ):
+        response = self.url.post( verify=False )
+        self.assertIn( 'verify', post.call_args[1] )
+        self.assertIsNotNone( post.call_args[1]['verify'] )
+        self.assertFalse( post.call_args[1]['verify'] )
+
+    @patch( 'requests.put' )
+    def test_post_verify_global_should_be_added( self, put ):
+        self.url = Chibi_url( 'http://ifconfig.me', verify=False )
+        response = self.url.put()
+        self.assertIn( 'verify', put.call_args[1] )
+        self.assertIsNotNone( put.call_args[1]['verify'] )
+        self.assertFalse( put.call_args[1]['verify'] )
+
+    @patch( 'requests.put' )
+    def test_post_verify_should_be_added( self, put ):
+        response = self.url.put( verify=False )
+        self.assertIn( 'verify', put.call_args[1] )
+        self.assertIsNotNone( put.call_args[1]['verify'] )
+        self.assertFalse( put.call_args[1]['verify'] )
+
+    @patch( 'requests.delete' )
+    def test_post_verify_global_should_be_added( self, delete ):
+        self.url = Chibi_url( 'http://ifconfig.me', verify=False )
+        response = self.url.delete()
+        self.assertIn( 'verify', delete.call_args[1] )
+        self.assertIsNotNone( delete.call_args[1]['verify'] )
+        self.assertFalse( delete.call_args[1]['verify'] )
+
+    @patch( 'requests.delete' )
+    def test_post_verify_should_be_added( self, delete ):
+        response = self.url.delete( verify=False )
+        self.assertIn( 'verify', delete.call_args[1] )
+        self.assertIsNotNone( delete.call_args[1]['verify'] )
+        self.assertFalse( delete.call_args[1]['verify'] )
 
 
 class Test_download_lenna( TestCase ):

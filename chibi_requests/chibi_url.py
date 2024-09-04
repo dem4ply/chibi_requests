@@ -129,6 +129,7 @@ class Chibi_url( str ):
     def get( self, *args, **kw ):
         logger.info( f'GET "{self}"' )
         args = self._parse_arguments( *args )
+        kw.setdefault( 'verify', self.verify )
         response = self.requests.get(
             str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
@@ -136,6 +137,7 @@ class Chibi_url( str ):
     def post( self, *args, **kw ):
         logger.info( f'POST "{self}"' )
         args = self._parse_arguments( *args )
+        kw.setdefault( 'verify', self.verify )
         response = self.requests.post(
             str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
@@ -143,6 +145,7 @@ class Chibi_url( str ):
     def put( self, *args, **kw ):
         logger.info( f'PUT "{self}"' )
         args = self._parse_arguments( *args )
+        kw.setdefault( 'verify', self.verify )
         response = self.requests.put(
             str( self ), *args, auth=self.auth, headers=self.headers, **kw )
         return self.response_class( response, self )
@@ -150,8 +153,10 @@ class Chibi_url( str ):
     def delete( self, *args, **kw ):
         logger.info( f'DELETE "{self}"' )
         args = self._parse_arguments( *args )
+        kw.setdefault( 'verify', self.verify )
         response = self.requests.delete(
-            str( self ), *args, auth=self.auth, headers=self.headers, **kw )
+            str( self ), *args, auth=self.auth, headers=self.headers,
+            **kw )
         return self.response_class( response, self )
 
     def download( self, path, *args, chunk_size=8192, **kw ):
@@ -177,6 +182,7 @@ class Chibi_url( str ):
             path += self.base_name
 
         logger.info( f'DOWNLOAD "{self}" into "{path}"' )
+        kw.setdefault( 'verify', self.verify )
         response = self.requests.get(
             str( self ), *args, **kw, headers=self.headers,
             auth=self.auth, stream=True, )
@@ -193,6 +199,13 @@ class Chibi_url( str ):
     def auth( self ):
         try:
             return self.kw.auth
+        except AttributeError:
+            return None
+
+    @property
+    def verify( self ):
+        try:
+            return self.kw.verify
         except AttributeError:
             return None
 
