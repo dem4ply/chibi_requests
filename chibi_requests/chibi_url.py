@@ -255,6 +255,33 @@ class Chibi_url( str ):
                 response_class=self.response_class, **self.kw )
             return new_url + self.params
 
+    def add_subfix( self, string ):
+        """
+        agrega subfijos a la url
+
+        Parameters
+        ----------
+        string: str
+            una cadena que se agregara al final
+
+        Returns
+        -------
+        Chibi_url
+
+        Examples
+        --------
+        >>>Chibi_url( "http://google.com" ).add_subfix( ".json" )
+        "http://google.com.json"
+        """
+        if isinstance( string, str ):
+            new_url = type( self )(
+                f"{self.url}{string}",
+                response_class=self.response_class, **self.kw )
+            return new_url + self.params
+        else:
+            NotImplementedError(
+                f"no implementado agregar subfijos de tipo '{type(string)}'" )
+
     def __add__dict__( self, other ):
         parts = list( urlparse( self ) )
         current = parse_qs( parts[4], keep_blank_values=True )

@@ -97,26 +97,26 @@ class Test_url_add( Test_url ):
         self.assertEqual( url, 'https://google.com/cosa1?param1=asdf' )
 
 
-class Test_add_mainteing_the_response_class( Test_url ):
+class Test_add_maintain_the_response_class( Test_url ):
     def setUp( self ):
         super().setUp()
         self.response_class = Mock
         self.url = Chibi_url(
             "https://google.com", response_class=self.response_class )
 
-    def test_with_dict_should_mainteing_the_response_class( self ):
+    def test_with_dict_should_maintain_the_response_class( self ):
         result = self.url + { 'param1': 'value1' }
         self.assertEqual( result.response_class, self.response_class )
 
-    def test_with_str_should_mainteing_the_response_class( self ):
+    def test_with_str_should_maintain_the_response_class( self ):
         result = self.url + 'cosa'
         self.assertEqual( result.response_class, self.response_class )
 
-    def test_with_query_should_mainteing_the_response_class( self ):
+    def test_with_query_should_maintain_the_response_class( self ):
         result = self.url + "?param1=value1"
         self.assertEqual( result.response_class, self.response_class )
 
-    def test_with_book_should_mainteing_the_response_class( self ):
+    def test_with_book_should_maintain_the_response_class( self ):
         book = Book( page=20, page_size=10, total_elements=1000 )
         result = self.url + book
         self.assertEqual( result.response_class, self.response_class )
@@ -407,3 +407,33 @@ class Test_headers( Test_url ):
         self.url.post( { 'data': 'asdf' } )
         j = requests.call_args[0][1]
         self.assertEqual( j, '{"data": "asdf"}' )
+
+
+class Test_add_subfix( Test_url ):
+    def setUp( self ):
+        super().setUp()
+        self.url = Chibi_url( 'http://a.4cdn.org/{board}/threads' )
+
+    def test_should_add_subfix( self ):
+        result = self.url.add_subfix( '.json' )
+        expected = 'http://a.4cdn.org/{board}/threads.json'
+        self.assertEqual( result, expected )
+
+    def test_with_parameters_should_add_prefix( self ):
+        url = self.url + { 'param1': 'a' }
+        result = url.add_subfix( '.json' )
+        expected = 'http://a.4cdn.org/{board}/threads.json?param1=a'
+        self.assertEqual( result, expected )
+
+    def test_with_response_class_should_maintain_response_class( self ):
+        response_class = Mock
+        url = Chibi_url(
+            "https://google.com", response_class=response_class )
+        result = url.add_subfix( '.json' )
+        self.assertEqual( result.response_class, response_class )
+
+    def test_should_maintain_meta( self ):
+        url = Chibi_url(
+            "https://www.google.com", cosa1="cosa1", cosa2="cosa2" )
+        result = url.add_subfix( '.json' )
+        self.assertEqual( result.kw, { 'cosa1': 'cosa1', 'cosa2': 'cosa2' } )
