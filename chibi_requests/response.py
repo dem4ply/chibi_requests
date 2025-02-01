@@ -1,14 +1,39 @@
 from bs4 import BeautifulSoup
 from chibi.atlas import Chibi_atlas_ignore_case, _wrap, loads, Atlas
 from marshmallow import Schema
+from requests.exceptions import HTTPError
 
 
 class Response:
     serializer = None
+    is_raise_when_no_ok = False
 
     def __init__( self, response, url ):
         self._response = response
         self.url = url
+        self.raise_when_no_ok()
+
+    def raise_when_no_ok( self ):
+        if not self.is_raise_when_no_ok or self.ok:
+            return
+        http_error_msg = ""
+
+        if 400 <= self.status_code < 500:
+            http_error_msg = (
+                f"{self.status_code} Client Error: {self.url}"
+            )
+
+        elif 500 <= self.status_code < 600:
+            http_error_msg = (
+                f"{self.status_code} Server Error: url: {self.url}"
+            )
+        else:
+            http_error_msg = (
+                f"{self.status_code} HTTP Error: url: {self.url}"
+            )
+
+        if http_error_msg:
+            raise HTTPError( http_error_msg, response=self )
 
     @property
     def headers( self ):

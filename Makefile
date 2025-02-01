@@ -86,7 +86,7 @@ report:
 
 test_unit:
 	@echo "Running tests"
-	@coverage run -m unittest discover -p "*.py" -s tests
+	@coverage run -m unittest discover -v -p "*.py" -s tests
 
 open_report_firefox:
 	@nohup firefox .coverage_html_report/index.html > /dev/null &

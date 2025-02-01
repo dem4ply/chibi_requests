@@ -7,12 +7,26 @@ from chibi.atlas import Chibi_atlas
 from chibi.file.temp import Chibi_temp_path
 from chibi.metaphors import Book
 from requests.auth import HTTPBasicAuth
-
+from requests.exceptions import HTTPError
 from chibi_requests import Chibi_url, Response
+from vcr_unittest import VCRTestCase
 
 
-class Test_url( TestCase ):
+class Response_ok( Mock ):
+    status_code = 200
+
+
+class Response_400( Mock ):
+    status_code = 400
+
+
+class Response_raise_no_200( Response ):
+    is_raise_when_no_ok = True
+
+
+class Test_url( VCRTestCase ):
     def setUp( self ):
+        super().setUp()
         self.url = Chibi_url( "https://google.com" )
 
 
@@ -134,6 +148,7 @@ class Test_property( Test_url ):
 
 class Test_methods( Test_url ):
     def setUp( self ):
+        super().setUp()
         self.url = Chibi_url( 'http://ifconfig.me' )
 
     def test_get( self ):
@@ -176,30 +191,30 @@ class Test_methods( Test_url ):
         self.assertIsNotNone( post.call_args[1]['verify'] )
         self.assertFalse( post.call_args[1]['verify'] )
 
-    @patch( 'requests.post' )
+    @patch( 'requests.post', new_callable=Response_ok )
     def test_post_verify_should_be_added( self, post ):
         response = self.url.post( verify=False )
         self.assertIn( 'verify', post.call_args[1] )
         self.assertIsNotNone( post.call_args[1]['verify'] )
         self.assertFalse( post.call_args[1]['verify'] )
 
-    @patch( 'requests.put' )
-    def test_post_verify_global_should_be_added( self, put ):
+    @patch( 'requests.put', new_callable=Response_ok )
+    def test_put_verify_global_should_be_added( self, put ):
         self.url = Chibi_url( 'http://ifconfig.me', verify=False )
         response = self.url.put()
         self.assertIn( 'verify', put.call_args[1] )
         self.assertIsNotNone( put.call_args[1]['verify'] )
         self.assertFalse( put.call_args[1]['verify'] )
 
-    @patch( 'requests.put' )
-    def test_post_verify_should_be_added( self, put ):
+    @patch( 'requests.put', new_callable=Response_ok )
+    def test_put_verify_should_be_added( self, put ):
         response = self.url.put( verify=False )
         self.assertIn( 'verify', put.call_args[1] )
         self.assertIsNotNone( put.call_args[1]['verify'] )
         self.assertFalse( put.call_args[1]['verify'] )
 
-    @patch( 'requests.delete' )
-    def test_post_verify_global_should_be_added( self, delete ):
+    @patch( 'requests.delete', new_callable=Response_ok )
+    def test_delete_verify_global_should_be_added( self, delete ):
         self.url = Chibi_url( 'http://ifconfig.me', verify=False )
         response = self.url.delete()
         self.assertIn( 'verify', delete.call_args[1] )
@@ -207,15 +222,16 @@ class Test_methods( Test_url ):
         self.assertFalse( delete.call_args[1]['verify'] )
 
     @patch( 'requests.delete' )
-    def test_post_verify_should_be_added( self, delete ):
+    def test_delete_verify_should_be_added( self, delete ):
         response = self.url.delete( verify=False )
         self.assertIn( 'verify', delete.call_args[1] )
         self.assertIsNotNone( delete.call_args[1]['verify'] )
         self.assertFalse( delete.call_args[1]['verify'] )
 
 
-class Test_download_lenna( TestCase ):
+class Test_download_lenna( VCRTestCase ):
     def setUp( self ):
+        super().setUp()
         self.download_folder = Chibi_temp_path()
         self.lenna_url = Chibi_url( 'http://www.lenna.org/len_std.jpg' )
 
@@ -302,13 +318,13 @@ class Test_auth( Test_url ):
         self.assertNotEqual( self.url , other_url )
         self.assertEqual( self.url.auth, other_url.auth )
 
-    @patch( 'requests.get' )
+    @patch( 'requests.get', new_callable=Response_ok )
     def test_should_send_the_auth_using_get( self, requests ):
         self.url += HTTPBasicAuth( 'some_user', 'some_password' )
         self.url.get()
         self.assertEqual( requests.call_args[1][ 'auth' ], self.url.auth )
 
-    @patch( 'requests.post' )
+    @patch( 'requests.post', new_callable=Response_ok )
     def test_should_send_the_auth_using_post( self, requests ):
         self.url += HTTPBasicAuth( 'some_user', 'some_password' )
         self.url.post()
@@ -338,15 +354,16 @@ class Test_session( Test_url ):
         self.assertNotEqual( self.url , other_url )
         self.assertEqual( self.url.session, other_url.session )
 
-    @patch( 'requests.Session.get' )
+    @patch( 'requests.Session.get', new_callable=Response_ok )
     def test_should_use_the_session_when_using_get( self, get ):
         session = requests.Session()
         self.url += session
         self.url.get()
         get.assert_called()
 
-    @patch( 'requests.Session.post' )
+    @patch( 'requests.Session.post', )
     def test_should_use_the_session_when_using_post( self, post ):
+        post.return_value = Response_ok()
         session = requests.Session()
         self.url += session
         self.url.post()
@@ -437,3 +454,19 @@ class Test_add_subfix( Test_url ):
             "https://www.google.com", cosa1="cosa1", cosa2="cosa2" )
         result = url.add_subfix( '.json' )
         self.assertEqual( result.kw, { 'cosa1': 'cosa1', 'cosa2': 'cosa2' } )
+
+
+class Test_raise_when_is_not_ok( Test_url ):
+    def setUp( self ):
+        super().setUp()
+        self.url = Chibi_url(
+            'http://a.4cdn.org/{board}/threads.json',
+            response_class=Response_raise_no_200 )
+
+    @patch( 'requests.get', new_callable=Response_400 )
+    def test_should_send_the_auth_using_get( self, requests ):
+        self.url.headers.content_type = 'application/json'
+        with self.assertRaises( HTTPError ) as e:
+            self.url.get()
+        self.assertTrue( str( e.exception ).startswith(
+            '400 Client Error' ) )

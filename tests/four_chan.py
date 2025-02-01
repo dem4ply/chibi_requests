@@ -4,6 +4,7 @@ from unittest import TestCase
 from marshmallow import Schema, pre_load, INCLUDE, fields
 
 from chibi_requests import Chibi_url, Response
+from vcr_unittest import VCRTestCase
 
 
 class Four_chan_schema( Schema ):
@@ -23,6 +24,7 @@ class Four_chan_schema( Schema ):
 
 class Response_threads( Response ):
     serializer = Four_chan_schema
+    is_raise_when_is_not_ok = True
 
 
 threads = Chibi_url(
@@ -30,7 +32,7 @@ threads = Chibi_url(
     response_class=Response_threads ).format( board='w' )
 
 
-class Test_four_chan_with_schema( TestCase ):
+class Test_four_chan_with_schema( VCRTestCase ):
     def test_should_work( self ):
         response = threads.get()
         native = response.native
