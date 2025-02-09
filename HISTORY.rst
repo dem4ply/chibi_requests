@@ -3,6 +3,19 @@ History
 =======
 
 ********************
+1.2.2 ( 2025-02-01 )
+********************
+
+* se agrego la posibilidad que los response lanzen
+  excepciones segun el codigo de error
+
+********************
+1.2.1 ( 2025-02-01 )
+********************
+
+* dependencia de marshmallow > 2.26
+
+********************
 1.2.0 ( 2024-10-26 )
 ********************
 
