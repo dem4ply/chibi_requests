@@ -11,7 +11,26 @@ class Response:
     def __init__( self, response, url ):
         self._response = response
         self.url = url
+        self.parent = None
         self.raise_when_no_ok()
+
+    @classmethod
+    def from_response( cls, response ):
+        """
+        contrulle la intancia de parte de otra respuesta para cambiar
+        su clase y asigna la response original como parent
+
+        Parameters
+        ----------
+        response: Response
+
+        Returns
+        -------
+        Response
+        """
+        result = cls( response._response, response.url )
+        result.parent = response
+        return result
 
     def raise_when_no_ok( self ):
         if not self.is_raise_when_no_ok or self.ok:
