@@ -1,4 +1,4 @@
-from unittest import TestCase, skip
+from unittest import skip
 from unittest.mock import Mock, patch
 
 import requests
@@ -8,8 +8,9 @@ from chibi.file.temp import Chibi_temp_path
 from chibi.metaphors import Book
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
-from chibi_requests import Chibi_url, Response
 from vcr_unittest import VCRTestCase
+
+from chibi_requests import Chibi_url, Response
 
 
 class Response_ok( Mock ):
@@ -162,14 +163,14 @@ class Test_methods( Test_url ):
     @patch( 'requests.get' )
     def test_get_verify_global_should_be_added( self, get ):
         self.url = Chibi_url( 'http://ifconfig.me', verify=False )
-        response = self.url.get()
+        self.url.get()
         self.assertIn( 'verify', get.call_args[1] )
         self.assertIsNotNone( get.call_args[1]['verify'] )
         self.assertFalse( get.call_args[1]['verify'] )
 
     @patch( 'requests.get' )
     def test_get_verify_should_be_added( self, get ):
-        response = self.url.get( verify=False )
+        self.url.get( verify=False )
         self.assertIn( 'verify', get.call_args[1] )
         self.assertIsNotNone( get.call_args[1]['verify'] )
         self.assertFalse( get.call_args[1]['verify'] )
@@ -186,14 +187,14 @@ class Test_methods( Test_url ):
     @patch( 'requests.post' )
     def test_post_verify_global_should_be_added( self, post ):
         self.url = Chibi_url( 'http://ifconfig.me', verify=False )
-        response = self.url.post()
+        self.url.post()
         self.assertIn( 'verify', post.call_args[1] )
         self.assertIsNotNone( post.call_args[1]['verify'] )
         self.assertFalse( post.call_args[1]['verify'] )
 
     @patch( 'requests.post', new_callable=Response_ok )
     def test_post_verify_should_be_added( self, post ):
-        response = self.url.post( verify=False )
+        self.url.post( verify=False )
         self.assertIn( 'verify', post.call_args[1] )
         self.assertIsNotNone( post.call_args[1]['verify'] )
         self.assertFalse( post.call_args[1]['verify'] )
@@ -201,14 +202,14 @@ class Test_methods( Test_url ):
     @patch( 'requests.put', new_callable=Response_ok )
     def test_put_verify_global_should_be_added( self, put ):
         self.url = Chibi_url( 'http://ifconfig.me', verify=False )
-        response = self.url.put()
+        self.url.put()
         self.assertIn( 'verify', put.call_args[1] )
         self.assertIsNotNone( put.call_args[1]['verify'] )
         self.assertFalse( put.call_args[1]['verify'] )
 
     @patch( 'requests.put', new_callable=Response_ok )
     def test_put_verify_should_be_added( self, put ):
-        response = self.url.put( verify=False )
+        self.url.put( verify=False )
         self.assertIn( 'verify', put.call_args[1] )
         self.assertIsNotNone( put.call_args[1]['verify'] )
         self.assertFalse( put.call_args[1]['verify'] )
@@ -216,14 +217,14 @@ class Test_methods( Test_url ):
     @patch( 'requests.delete', new_callable=Response_ok )
     def test_delete_verify_global_should_be_added( self, delete ):
         self.url = Chibi_url( 'http://ifconfig.me', verify=False )
-        response = self.url.delete()
+        self.url.delete()
         self.assertIn( 'verify', delete.call_args[1] )
         self.assertIsNotNone( delete.call_args[1]['verify'] )
         self.assertFalse( delete.call_args[1]['verify'] )
 
     @patch( 'requests.delete' )
     def test_delete_verify_should_be_added( self, delete ):
-        response = self.url.delete( verify=False )
+        self.url.delete( verify=False )
         self.assertIn( 'verify', delete.call_args[1] )
         self.assertIsNotNone( delete.call_args[1]['verify'] )
         self.assertFalse( delete.call_args[1]['verify'] )

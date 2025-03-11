@@ -1,15 +1,7 @@
-from unittest import TestCase, skip
-from unittest.mock import Mock, patch
+from unittest import TestCase
+from unittest.mock import Mock
 
-import requests
-from bs4 import BeautifulSoup
-from chibi.atlas import Chibi_atlas
-from chibi.file.temp import Chibi_temp_path
-from chibi.metaphors import Book
-from requests.auth import HTTPBasicAuth
-from requests.exceptions import HTTPError
 from chibi_requests import Chibi_url, Response
-from vcr_unittest import VCRTestCase
 
 
 class New_respone( Response ):

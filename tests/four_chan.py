@@ -1,5 +1,4 @@
 from functools import reduce
-from unittest import TestCase
 
 from marshmallow import Schema, pre_load, INCLUDE, fields
 
