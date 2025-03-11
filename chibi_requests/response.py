@@ -122,13 +122,16 @@ class Response:
     def parse_like_xml( self ):
         return loads( self.body )
 
+    def parse_like_html( self ):
+        return BeautifulSoup( self.body, 'html.parser' )
+
     def parse_content_type( self ):
         if self.is_json:
             return self.parse_like_json()
         elif self.is_xml:
             return self.parse_like_xml()
         elif self.is_html:
-            return BeautifulSoup( self.body, 'html.parser' )
+            return self.parse_like_html()
         elif self.is_text:
             return self.body
         else:
