@@ -37,6 +37,12 @@ class Test_base_name( Test_url ):
         base_name = self.url.base_name
         self.assertEqual( "1234567", base_name )
 
+    def test_base_name_with_parameters_should_work( self ):
+        self.url = self.url + "1234567"
+        self.url = self.url + { 'param': 'something' }
+        base_name = self.url.base_name
+        self.assertEqual( "1234567", base_name )
+
 
 class Test_dir_name( Test_url ):
     def test_dir_name_should_return_the_last_part( self ):
@@ -48,6 +54,12 @@ class Test_dir_name( Test_url ):
         url = self.url + 'asdf' + "1234567"
         path = url.dir_name
         self.assertIsInstance( path, Chibi_url )
+
+    def test_dir_name_with_parameters_should_work( self ):
+        url = self.url + 'asdf' + "1234567"
+        url = url + { 'param': 'something' }
+        path = url.dir_name
+        self.assertEqual( self.url + 'asdf', path )
 
 
 class Test_url_add( Test_url ):
