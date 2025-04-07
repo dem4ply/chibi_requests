@@ -237,14 +237,17 @@ class Chibi_url( str ):
             news = parse_qs( other[1:], keep_blank_values=True )
             current.update( news )
             parts[4] = urlencode( current, doseq=True )
-            return type( self )( urlunparse( parts ),
+            return type( self )(
+                urlunparse( parts ),
                 response_class=self.response_class, **self.kw )
         elif other.startswith( '/' ):
             parts = list( urlparse( self.url ) )
             parts[2] = other
-            return type( self )( urlunparse( parts ),
+            return type( self )(
+                urlunparse( parts ),
                 response_class=self.response_class, **self.kw )
-            return type( self )( "/".join( self.split( '/' ) + [ other ] ),
+            return type( self )(
+                "/".join( self.split( '/' ) + [ other ] ),
                 response_class=self.response_class, **self.kw )
         elif other.startswith( 'http' ):
             return type( self )(
@@ -287,7 +290,8 @@ class Chibi_url( str ):
         current = parse_qs( parts[4], keep_blank_values=True )
         current.update( other )
         parts[4] = urlencode( current, doseq=True )
-        return type( self )( urlunparse( parts ),
+        return type( self )(
+            urlunparse( parts ),
             response_class=self.response_class, **self.kw )
 
     def __add__book__( self, other ):

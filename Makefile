@@ -93,7 +93,7 @@ open_report_firefox:
 
 pep8:
 	@echo "Running pep8 tests..."
-	@pep8 --statistics chibi_requests tests
+	@pycodestyle --statistics chibi_requests tests
 
 flakes:
 	@echo "Running flakes tests..."

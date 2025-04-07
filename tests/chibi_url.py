@@ -328,7 +328,7 @@ class Test_auth( Test_url ):
         self.url += auth
         other_url = self.url + { 'param1': 'value1' }
 
-        self.assertNotEqual( self.url , other_url )
+        self.assertNotEqual( self.url, other_url )
         self.assertEqual( self.url.auth, other_url.auth )
 
     @patch( 'requests.get', new_callable=Response_ok )
@@ -364,7 +364,7 @@ class Test_session( Test_url ):
         self.url += session
         other_url = self.url + { 'param1': 'value1' }
 
-        self.assertNotEqual( self.url , other_url )
+        self.assertNotEqual( self.url, other_url )
         self.assertEqual( self.url.session, other_url.session )
 
     @patch( 'requests.Session.get', new_callable=Response_ok )
