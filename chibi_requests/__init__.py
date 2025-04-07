@@ -6,4 +6,4 @@ __all__ = [ 'Chibi_url', 'Response' ]
 
 __author__ = """Dem4ply"""
 __email__ = 'dem4ply@gmail.com'
-__version__ = '1.3.1'
+__version__ = '__version__ = '1.3.1''
