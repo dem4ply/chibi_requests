@@ -3,6 +3,13 @@ History
 =======
 
 ********************
+1.4.0 ( 2025-09-18 )
+********************
+
+* se agrega la copia de los status codes de django rest framwork
+  en chibi_requests.status_code
+
+********************
 1.3.1 ( 2025-03-11 )
 ********************
 
