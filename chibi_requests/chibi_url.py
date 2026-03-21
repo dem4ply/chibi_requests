@@ -218,6 +218,13 @@ class Chibi_url( str ):
 
     @property
     def session( self ):
+        """
+        regresa la session actual o None si no tiene
+
+        Returns
+        -------
+        requests.Session or None
+        """
         try:
             return self.kw.session
         except AttributeError:
@@ -225,6 +232,9 @@ class Chibi_url( str ):
 
     @session.setter
     def session( self, value ):
+        """
+        assigna la session a la url sobreescribiendo la anterior
+        """
         if isinstance( value, Session ):
             self.kw.session = value
         else:

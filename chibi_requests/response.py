@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from chibi.atlas import Chibi_atlas_ignore_case, _wrap, loads, Atlas
 from marshmallow import Schema
+from marshmallow.experimental.context import Context
 from requests.exceptions import HTTPError
 
 
@@ -157,13 +158,17 @@ class Response:
                 'no son de marshmallow' )
 
     def parse_native( self ):
+        """
+        parsea el response a nativo usando el content-type de la respuesta
+        """
         parse = self.parse_content_type()
         serializer = self.get_serializer()
         if serializer:
             many = self.native_is_many
             serializer = serializer()
-            serializer.context[ 'url' ] = self.url
-            parse = serializer.load( parse, many=many )
+            # serializer.context[ 'url' ] = self.url
+            with Context( { 'url': self.url } ):
+                parse = serializer.load( parse, many=many )
             if isinstance( parse, ( dict, list ) ):
                 parse = Atlas( parse )
         return parse
