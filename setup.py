@@ -13,7 +13,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'chibi>=0.10.0', 'requests>=2.22.0', 'beautifulsoup4>=4.8.0',
-    'marshmallow>=3.26.0' ]
+    'marshmallow>=4' ]
 
 setup(
     author="Dem4ply",
