@@ -58,7 +58,7 @@ Chibi_url
 
 	url = Chibi_url( "https://google.com" )
 	url += "?param1=value1"
-	assert url.parmas == { 'param1': 'value1' }
+	assert url.params == { 'param1': 'value1' }
 
 	url = Chibi_url( "https://google.com" )
 	assert url.host == 'google.com'

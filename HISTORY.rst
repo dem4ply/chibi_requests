@@ -3,6 +3,13 @@ History
 =======
 
 ********************
+2.0.0 ( 2026-05-10 )
+********************
+
+* se agrego la propiedad de context a las respuestas para enviar el contexto
+  a los serializadores
+
+********************
 1.5.0 ( 2026-03-21 )
 ********************
 
