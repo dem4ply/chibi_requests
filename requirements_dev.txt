@@ -16,3 +16,5 @@ build
 setuptools
 ropevim
 vcrpy-unittest
+
+chibi_marshmallow > 1

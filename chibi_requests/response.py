@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from chibi.atlas import Chibi_atlas_ignore_case, _wrap, loads, Atlas
+from chibi_atlas import Chibi_atlas
 from marshmallow import Schema
 from marshmallow.experimental.context import Context
 from requests.exceptions import HTTPError
@@ -167,7 +168,7 @@ class Response:
             many = self.native_is_many
             serializer = serializer()
             # serializer.context[ 'url' ] = self.url
-            with Context( { 'url': self.url } ):
+            with Context( dict( self.context ) ):
                 parse = serializer.load( parse, many=many )
             if isinstance( parse, ( dict, list ) ):
                 parse = Atlas( parse )
@@ -184,3 +185,12 @@ class Response:
 
     def __bool__( self ):
         return self.ok
+
+    @property
+    def context( self ):
+        try:
+            return self._context
+        except AttributeError:
+            self._context = Chibi_atlas()
+            self._context.url = self.url
+            return self._context
