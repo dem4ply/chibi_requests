@@ -31,6 +31,12 @@ class Test_url( VCRTestCase ):
         self.url = Chibi_url( "https://google.com" )
 
 
+class Test_http_url( VCRTestCase ):
+    def setUp( self ):
+        super().setUp()
+        self.url = Chibi_url( "http://google.com" )
+
+
 class Test_base_name( Test_url ):
     def test_base_name_should_return_the_last_part( self ):
         self.url = self.url + "1234567"
@@ -106,7 +112,7 @@ class Test_url_add( Test_url ):
     def test_add_root_with_parameters_should_be_removed( self ):
         result = self.url + { 'param1': 'value1' }
         result = result + '/cosa1'
-        self.assertEqual( result, self.url + '/cosa1' )
+        self.assertEqual( str( result ), str( self.url + '/cosa1' ) )
 
     def test_add_a_book_should_add_the_query( self ):
         book = Book( page=20, page_size=10, total_elements=1000 )
@@ -122,6 +128,22 @@ class Test_url_add( Test_url ):
         url = self.url + { 'param1': 'asdf' }
         url = url + 'cosa1'
         self.assertEqual( url, 'https://google.com/cosa1?param1=asdf' )
+
+    def test_add_double_root_should_only_have_the_same_protocol( self ):
+        result = self.url + '//another.com/cosa1'
+        self.assertEqual(
+            result,
+            "https://another.com/cosa1",
+        )
+
+
+class Test_add_with_http( Test_http_url ):
+    def test_add_double_root_should_only_have_the_same_protocol( self ):
+        result = self.url + '//another.com/cosa1'
+        self.assertEqual(
+            result,
+            "http://another.com/cosa1",
+        )
 
 
 class Test_add_maintain_the_response_class( Test_url ):

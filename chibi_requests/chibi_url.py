@@ -250,6 +250,13 @@ class Chibi_url( str ):
             return type( self )(
                 urlunparse( parts ),
                 response_class=self.response_class, **self.kw )
+        elif other.startswith( '//' ):
+            parts = list( urlparse( self.url ) )
+            other_parts = list( urlparse( other ) )
+            other_parts[0] = parts[0]
+            return type( self )(
+                urlunparse( other_parts ),
+                response_class=self.response_class, **self.kw )
         elif other.startswith( '/' ):
             parts = list( urlparse( self.url ) )
             parts[2] = other
