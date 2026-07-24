@@ -270,8 +270,13 @@ class Chibi_url( str ):
             return type( self )(
                 other, response_class=self.response_class, **self.kw )
         else:
+            split_parts = self.url.split( '/' )
+            if len( split_parts ) > 3:
+                tail = filter( bool, split_parts[3:] )
+                split_parts = split_parts[:3] + list( tail )
+            split_parts.append( other )
             new_url = type( self )(
-                "/".join( self.url.split( '/' ) + [ other ] ),
+                "/".join( split_parts ),
                 response_class=self.response_class, **self.kw )
             return new_url + self.params
 

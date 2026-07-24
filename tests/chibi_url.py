@@ -136,6 +136,12 @@ class Test_url_add( Test_url ):
             "https://another.com/cosa1",
         )
 
+    def test_add_str_with_slash_on_end_should_be_clean( self ):
+        result = self.url + "cosa/"
+        self.assertEqual( "https://google.com/cosa/", result )
+        result = self.url + "cosa/" + "cosa2"
+        self.assertEqual( "https://google.com/cosa/cosa2", result )
+
 
 class Test_add_with_http( Test_http_url ):
     def test_add_double_root_should_only_have_the_same_protocol( self ):
