@@ -3,6 +3,13 @@ History
 =======
 
 ********************
+2.1.1 ( 2026-07-21 )
+********************
+
+* correcion de bug que agregaba 2 // cuando sumaba un string que ya tenia
+  al final /
+
+********************
 2.1.0 ( 2026-07-21 )
 ********************
 
