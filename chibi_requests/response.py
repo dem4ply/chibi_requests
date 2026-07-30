@@ -4,6 +4,7 @@ from chibi_atlas import Chibi_atlas
 from marshmallow import Schema
 from marshmallow.experimental.context import Context
 from requests.exceptions import HTTPError
+from .exceptions import Client_error
 
 
 class Response:
@@ -40,9 +41,7 @@ class Response:
         http_error_msg = ""
 
         if 400 <= self.status_code < 500:
-            http_error_msg = (
-                f"{self.status_code} Client Error: {self.url}"
-            )
+            raise Client_error( self )
 
         elif 500 <= self.status_code < 600:
             http_error_msg = (
