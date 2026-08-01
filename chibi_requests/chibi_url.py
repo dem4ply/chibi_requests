@@ -117,6 +117,9 @@ class Chibi_url( str ):
 
     @property
     def url( self ):
+        """
+        regresa la url sin los parametros
+        """
         parts = self.parts
         parts[4] = ''
         return type( self )( urlunparse( parts ) )

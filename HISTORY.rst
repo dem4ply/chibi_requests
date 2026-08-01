@@ -8,6 +8,7 @@ History
 
 * correcion de bug que agregaba 2 // cuando sumaba un string que ya tenia
   al final /
+* se agrego excepcion para los status code 400
 
 ********************
 2.1.0 ( 2026-07-21 )
