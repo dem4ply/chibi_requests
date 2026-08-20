@@ -10,7 +10,7 @@ class Client_error( HTTPError ):
     def __str__( self ):
         try:
             native = self.response.native
-        except:
+        except Exception:
             native = self.response.body
         return (
             f"Client Error: {self.response.status_code} {self.response.url}\n"

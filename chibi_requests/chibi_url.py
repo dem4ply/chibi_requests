@@ -122,6 +122,7 @@ class Chibi_url( str ):
         """
         parts = self.parts
         parts[4] = ''
+        parts[-1] = ''  # elimina el fragmento de la url o lo que sigue de #
         return type( self )( urlunparse( parts ) )
 
     def format( self, *args, **kw ):

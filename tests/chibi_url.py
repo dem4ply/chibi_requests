@@ -427,9 +427,19 @@ class Test_properties( Test_url ):
             self.assertIsInstance( self.url.url, Chibi_url )
         with self.subTest( "normal url are equals" ):
             self.assertEqual( self.url, self.url.url )
-        with self.subTest( "with parans url are equals" ):
+        with self.subTest( "with params url are equals" ):
             url = self.url + { 'param': 'value' }
             self.assertEqual( self.url, url.url )
+
+
+class Test_property_url( Test_url ):
+    def test_should_remove_params( self ):
+        self.url + { "param1": "ok" }
+        self.assertNotIn( "param1", self.url.url )
+
+    def test_should_remove_fragment( self ):
+        url = Chibi_url( f"{self.url}#something" )
+        self.assertNotIn( "something", url.url )
 
 
 class Test_headers( Test_url ):
@@ -510,4 +520,4 @@ class Test_raise_when_is_not_ok( Test_url ):
         with self.assertRaises( HTTPError ) as e:
             self.url.get()
         self.assertTrue( str( e.exception ).startswith(
-            '400 Client Error' ) )
+            'Client Error: 400' ), str( e.exception ) )
