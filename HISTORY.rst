@@ -3,6 +3,19 @@ History
 =======
 
 ********************
+2.3.0 ( 2026-08-19 )
+********************
+
+* ahora la propiedad de url elimana los fragmentos de la url
+  o lo que sigue de #
+
+********************
+2.3.0 ( 2026-07-30 )
+********************
+
+* se cambio la excepcion de 400 status code
+
+********************
 2.1.1 ( 2026-07-21 )
 ********************
 
